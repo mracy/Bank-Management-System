@@ -50,7 +50,7 @@ Contributing
 We welcome contributions from the community! Feel free to open issues, submit pull requests, or contribute in any way you see fit. Check out our Contributing Guidelines for more details.
 
 License
-This project is licensed under the MIT License.
+This project is licensed under the HIT License.
 
 Contact
 [Include contact information or links to your communication channels]
