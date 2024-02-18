@@ -2,12 +2,12 @@ package bank.management.system;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 public class Conn {
 
     Connection c;
-    Statement s;
+    PreparedStatement pstmt;
 
     public Conn() {
         try {
@@ -16,12 +16,20 @@ public class Conn {
 
             // Establish the connection
             c = DriverManager.getConnection("jdbc:mysql://localhost:3306/bankmanagementsystem", "root", "01234567");
-
-            // Create a statement
-            s = c.createStatement();
-
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // You may want to create a method to get the PreparedStatement when needed
+    public PreparedStatement getPreparedStatement(String query) {
+        try {
+            // Create a prepared statement with the provided query
+            pstmt = c.prepareStatement(query);
+            return pstmt;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

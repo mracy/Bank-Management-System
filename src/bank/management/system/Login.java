@@ -117,15 +117,19 @@ public class Login extends JFrame implements ActionListener {
             Conn conn = new Conn();
             String cardnumber = cardTextField.getText();
             String pinnumber = pinTextField.getText();
-            String query = "select * from login where cardnumber = '" + cardnumber + "' and pin = '" + pinnumber + "'";
+            String query = "SELECT * FROM login WHERE cardnumber = ? AND pin = ?";
 
             try {
-                ResultSet rs = conn.s.executeQuery(query);
+                PreparedStatement pstmt = conn.c.prepareStatement(query);
+                pstmt.setString(1, cardnumber);
+                pstmt.setString(2, pinnumber);
+
+                ResultSet rs = pstmt.executeQuery();
+
                 // Process the ResultSet if needed
                 if (rs.next()) {
                     setVisible(false);
                     new Transaction(pinnumber).setVisible(true);
-
                 } else {
                     JOptionPane.showMessageDialog(null, "Incorrect Card Number or PIN ");
                 }

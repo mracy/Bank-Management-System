@@ -5,13 +5,13 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 
 public class PinChange extends JFrame implements ActionListener {
 
@@ -100,13 +100,24 @@ public class PinChange extends JFrame implements ActionListener {
 
                 // Update the PIN in the database
                 Conn conn = new Conn();
-                String updateBankQuery = "Update bank set pin = '" + reenteredPin + "' where pin='" + pinnumber + "'";
-                String updateLoginQuery = "Update login set pin = '" + reenteredPin + "' where pin='" + pinnumber + "'";
-                String updateSignupQuery = "Update signupthree set pin = '" + reenteredPin + "' where pin='" + pinnumber + "'";
+                String updateBankQuery = "UPDATE bank SET pin = ? WHERE pin = ?";
+                String updateLoginQuery = "UPDATE login SET pin = ? WHERE pin = ?";
+                String updateSignupQuery = "UPDATE signupthree SET pin = ? WHERE pin = ?";
 
-                conn.s.executeUpdate(updateBankQuery);
-                conn.s.executeUpdate(updateLoginQuery);
-                conn.s.executeUpdate(updateSignupQuery);
+                PreparedStatement updateBankStmt = conn.c.prepareStatement(updateBankQuery);
+                updateBankStmt.setString(1, reenteredPin);
+                updateBankStmt.setString(2, pinnumber);
+                updateBankStmt.executeUpdate();
+
+                PreparedStatement updateLoginStmt = conn.c.prepareStatement(updateLoginQuery);
+                updateLoginStmt.setString(1, reenteredPin);
+                updateLoginStmt.setString(2, pinnumber);
+                updateLoginStmt.executeUpdate();
+
+                PreparedStatement updateSignupStmt = conn.c.prepareStatement(updateSignupQuery);
+                updateSignupStmt.setString(1, reenteredPin);
+                updateSignupStmt.setString(2, pinnumber);
+                updateSignupStmt.executeUpdate();
 
                 JOptionPane.showMessageDialog(null, "PIN changed successfully!");
 

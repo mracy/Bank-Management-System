@@ -5,14 +5,14 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import static java.lang.System.exit;
-import java.sql.*;
-import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Date;
 
 public class FastCash extends JFrame implements ActionListener {
 
@@ -77,7 +77,6 @@ public class FastCash extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    // ...
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == backButton) {
             setVisible(false);
@@ -89,7 +88,12 @@ public class FastCash extends JFrame implements ActionListener {
             Conn c = new Conn();
 
             try {
-                ResultSet rs = c.s.executeQuery("SELECT * FROM bank WHERE pin = '" + pinnumber + "'");
+                // Update the balanceQuery
+                String balanceQuery = "SELECT * FROM bank WHERE pin = ?";
+                PreparedStatement balanceStmt = c.c.prepareStatement(balanceQuery);
+                balanceStmt.setString(1, pinnumber);
+                ResultSet rs = balanceStmt.executeQuery();
+
                 int balance = 0;
 
                 while (rs.next()) {
@@ -100,14 +104,20 @@ public class FastCash extends JFrame implements ActionListener {
                     }
                 }
 
-                if (balance < Integer.parseInt(amount)) {
+                if (balance < withdrawalAmount) {
                     JOptionPane.showMessageDialog(null, "Insufficient Balance");
                     return;
                 }
 
                 Date date = new Date();
-                String query = "INSERT INTO bank VALUES('" + pinnumber + "', '" + date + "', 'withdrawal', '" + amount + "')";
-                c.s.executeUpdate(query);
+                String insertQuery = "INSERT INTO bank VALUES(?, ?, ?, ?)";
+                PreparedStatement insertStmt = c.c.prepareStatement(insertQuery);
+                insertStmt.setString(1, pinnumber);
+                insertStmt.setString(2, date.toString());
+                insertStmt.setString(3, "withdrawal");
+                insertStmt.setString(4, amount);
+
+                insertStmt.executeUpdate();
 
                 JOptionPane.showMessageDialog(null, "Rs " + amount + " Debited Successfully");
 
@@ -119,7 +129,6 @@ public class FastCash extends JFrame implements ActionListener {
         }
     }
 
-// ...
     public static void main(String args[]) {
         new FastCash("");
     }

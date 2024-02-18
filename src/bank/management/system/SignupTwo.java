@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.sql.PreparedStatement;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,9 +25,7 @@ public class SignupTwo extends JFrame implements ActionListener {
     String formno;
 
     SignupTwo(String formno) {
-
         this.formno = formno;
-
         setLayout(null);
         setTitle("NEW ACCOUNT APPLICATION FORM - PAGE 2");
 
@@ -199,20 +197,25 @@ public class SignupTwo extends JFrame implements ActionListener {
             return; // Stop further execution
         }
 
-        // Rest of your code...
-        // Note: You need to define the missing variables like name, fname, dob, gender, email, marital, address, city, pincode, state, etc.
         try {
             Conn c = new Conn();
-            String query = "INSERT INTO signuptwo VALUES('" + formno + "', '" + sreligion + "', '" + scategory + "', '" + sincome
-                    + "', '" + seducation + "', '" + soccupation + "', '" + panText + "', '" + nidText + "', '" + seniorcitizen
-                    + "', '" + existingAccountLabel + "')";
-            c.s.executeUpdate(query);
+            String query = "INSERT INTO signuptwo VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = c.c.prepareStatement(query);
+            pstmt.setString(1, formno);
+            pstmt.setString(2, sreligion);
+            pstmt.setString(3, scategory);
+            pstmt.setString(4, sincome);
+            pstmt.setString(5, seducation);
+            pstmt.setString(6, soccupation);
+            pstmt.setString(7, panText);
+            pstmt.setString(8, nidText);
+            pstmt.setString(9, seniorcitizen);
+            pstmt.setString(10, existingAccountLabel);
+            pstmt.executeUpdate();
 
             // SignupThree Object
             setVisible(false);
             new SignupThree(formno).setVisible(true);
-
-            //SignupThree 
         } catch (Exception e) {
             e.printStackTrace();
         }

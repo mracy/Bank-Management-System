@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
 import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -67,9 +68,15 @@ public class Deposit extends JFrame implements ActionListener {
             } else {
                 Date date = new Date();
                 Conn conn = new Conn();
-                String query = "insert into bank values('" + pinnumber + "', '" + date + "', 'Deposit', '" + number + "')";
+                String query = "INSERT INTO bank VALUES(?, ?, ?, ?)";
                 try {
-                    conn.s.executeUpdate(query);
+                    PreparedStatement pstmt = conn.c.prepareStatement(query);
+                    pstmt.setString(1, pinnumber);
+                    pstmt.setString(2, date.toString());
+                    pstmt.setString(3, "Deposit");
+                    pstmt.setString(4, number);
+
+                    pstmt.executeUpdate();
                     JOptionPane.showMessageDialog(null, "Rs" + number + " Deposited Successfully");
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -1,10 +1,13 @@
 package bank.management.system;
 
 import com.toedter.calendar.JDateChooser;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Random;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -24,7 +27,6 @@ public class SignupOne extends JFrame implements ActionListener {
     ButtonGroup gendergroup, maritalgroup;
 
     SignupOne() {
-
         setLayout(null);
 
         Random ran = new Random();
@@ -182,18 +184,16 @@ public class SignupOne extends JFrame implements ActionListener {
         setSize(850, 800);
         setLocation(350, 10);
         setVisible(true);
-
     }
 
     public void actionPerformed(ActionEvent ae) {
-        String formno = " " + random; //long 
-        String name = nameTextField.getText(); //setText
+        String formno = " " + random;
+        String name = nameTextField.getText();
         String fname = fnameTextField.getText();
         String dob = ((JTextField) dateChooser.getDateEditor().getUiComponent()).getText();
         String gender = null;
         if (male.isSelected()) {
             gender = "Male";
-
         } else if (female.isSelected()) {
             gender = "Female";
         } else if (others.isSelected()) {
@@ -204,7 +204,6 @@ public class SignupOne extends JFrame implements ActionListener {
         String marital = null;
         if (married.isSelected()) {
             marital = "Married";
-
         } else if (unmarried.isSelected()) {
             marital = "Unmarried";
         } else if (other.isSelected()) {
@@ -217,7 +216,8 @@ public class SignupOne extends JFrame implements ActionListener {
         String pincode = pincodeTextField.getText();
 
         try {
-            if (name.trim().isEmpty() || fname.trim().isEmpty() || email.trim().isEmpty() || address.trim().isEmpty() || city.trim().isEmpty() || pincode.trim().isEmpty() || state.trim().isEmpty()) {
+            if (name.trim().isEmpty() || fname.trim().isEmpty() || email.trim().isEmpty() || address.trim().isEmpty()
+                    || city.trim().isEmpty() || pincode.trim().isEmpty() || state.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(null, "All fields are required");
             } else if (gendergroup.getSelection() == null) {
                 JOptionPane.showMessageDialog(null, "Please select a gender");
@@ -227,16 +227,27 @@ public class SignupOne extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(null, "Date of birth is required");
             } else {
                 Conn c = new Conn();
-                String query = "INSERT INTO signup VALUES('" + formno + "', '" + name + "', '" + fname + "', '" + dob + "', '" + gender + "', '" + email + "', '" + marital + "', '" + address + "', '" + city + "', '" + pincode + "', '" + state + "')";
-                c.s.executeUpdate(query);
+                String query = "INSERT INTO signup VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement pstmt = c.c.prepareStatement(query);
+                pstmt.setString(1, formno);
+                pstmt.setString(2, name);
+                pstmt.setString(3, fname);
+                pstmt.setString(4, dob);
+                pstmt.setString(5, gender);
+                pstmt.setString(6, email);
+                pstmt.setString(7, marital);
+                pstmt.setString(8, address);
+                pstmt.setString(9, city);
+                pstmt.setString(10, pincode);
+                pstmt.setString(11, state);
+                pstmt.executeUpdate();
 
                 setVisible(false);
                 new SignupTwo(formno).setVisible(true);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     public static void main(String arg[]) {

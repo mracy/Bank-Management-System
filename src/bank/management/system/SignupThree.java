@@ -5,7 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.security.SecureRandom;
-
+import java.sql.PreparedStatement;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -165,67 +165,82 @@ public class SignupThree extends JFrame implements ActionListener {
         setLocation(350, 0);
         setVisible(true);
     }
-    
 
     public void actionPerformed(ActionEvent ae) {
-    if (ae.getSource() == submit) {
-        String accountType = null;
-        if (r1.isSelected()) {
-            accountType = "Saving Account";
-        } else if (r2.isSelected()) {
-            accountType = "Fixed Deposited Account";
-        } else if (r3.isSelected()) {
-            accountType = "Current Account";
-        } else if (r4.isSelected()) {
-            accountType = "Saving Health Account";
-        }
-
-        SecureRandom secureRandom = new SecureRandom();
-        String cardnumber = String.valueOf(Math.abs(secureRandom.nextLong() % 90000000L) + 8880044409990444L);
-        String pinnumber = String.valueOf(Math.abs(secureRandom.nextLong() % 900L + 1000L));
-
-        String facility = "";
-        if (c1.isSelected()) {
-            facility = facility + " ATM Card";
-        } else if (c2.isSelected()) {
-            facility = facility + " Internet Banking";
-        } else if (c3.isSelected()) {
-            facility = facility + " Mobile Banking";
-        } else if (c4.isSelected()) {
-            facility = facility + " Email and SMS Alerts";
-        } else if (c5.isSelected()) {
-            facility = facility + " Cheque Book";
-        } else if (c6.isSelected()) {
-            facility = facility + " E-Statements";
-        }
-
-        try {
-            if (accountType == null || accountType.equals("")) {
-                JOptionPane.showMessageDialog(null, "Account Type is Required");
-            } else {
-                Conn conn = new Conn();
-                String query1 = "INSERT INTO signupthree VALUES('" + formno + "', '" + accountType + "', '" + cardnumber + "', '" + pinnumber + "', '" + facility + "')";
-                String query2 = "INSERT INTO login VALUES('" + formno + "', '" + cardnumber + "', '" + pinnumber + "')";
-                conn.s.executeUpdate(query1);
-                conn.s.executeUpdate(query2);
-
-                // Display a pop-up message with the card number and pin number
-                JOptionPane.showMessageDialog(null, "Submitted Successfully!\nCard Number: " + cardnumber + "\nPin: " + pinnumber);
-
-                // Close the current window and open the Deposit window
-                setVisible(false);
-                new Deposit(pinnumber).setVisible(true);
+        if (ae.getSource() == submit) {
+            String accountType = null;
+            if (r1.isSelected()) {
+                accountType = "Saving Account";
+            } else if (r2.isSelected()) {
+                accountType = "Fixed Deposited Account";
+            } else if (r3.isSelected()) {
+                accountType = "Current Account";
+            } else if (r4.isSelected()) {
+                accountType = "Saving Health Account";
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            SecureRandom secureRandom = new SecureRandom();
+            String cardNumber = String.valueOf(Math.abs(secureRandom.nextLong() % 90000000L) + 8880044409990444L);
+            String pinNumber = String.valueOf(Math.abs(secureRandom.nextLong() % 900L + 1000L));
+
+            String facilities = "";
+            if (c1.isSelected()) {
+                facilities += " ATM Card";
+            }
+            if (c2.isSelected()) {
+                facilities += " Internet Banking";
+            }
+            if (c3.isSelected()) {
+                facilities += " Mobile Banking";
+            }
+            if (c4.isSelected()) {
+                facilities += " Email and SMS Alerts";
+            }
+            if (c5.isSelected()) {
+                facilities += " Cheque Book";
+            }
+            if (c6.isSelected()) {
+                facilities += " E-Statements";
+            }
+
+            try {
+                if (accountType == null || accountType.equals("")) {
+                    JOptionPane.showMessageDialog(null, "Account Type is Required");
+                } else {
+                    Conn conn = new Conn();
+                    String query1 = "INSERT INTO signupthree VALUES (?, ?, ?, ?, ?)";
+                    PreparedStatement pstmt1 = conn.c.prepareStatement(query1);
+                    pstmt1.setString(1, formno);
+                    pstmt1.setString(2, accountType);
+                    pstmt1.setString(3, cardNumber);
+                    pstmt1.setString(4, pinNumber);
+                    pstmt1.setString(5, facilities);
+                    pstmt1.executeUpdate();
+
+                    String query2 = "INSERT INTO login VALUES (?, ?, ?)";
+                    PreparedStatement pstmt2 = conn.c.prepareStatement(query2);
+                    pstmt2.setString(1, formno);
+                    pstmt2.setString(2, cardNumber);
+                    pstmt2.setString(3, pinNumber);
+                    pstmt2.executeUpdate();
+
+                    // Display a pop-up message with the card number and pin number
+                    JOptionPane.showMessageDialog(null, "Submitted Successfully!\nCard Number: " + cardNumber + "\nPin: " + pinNumber);
+
+                    // Close the current window and open the login window
+                    setVisible(false);
+                    new Login().setVisible(true);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else if (ae.getSource() == cancel) {
+            System.exit(0);
         }
-
-    } else if (ae.getSource() == cancel) {
-        System.exit(0);
     }
-}
 
-public static void main(String[] args) {
-    new SignupThree("");
-}
+    public static void main(String[] args) {
+        new SignupThree("");
+    }
 }

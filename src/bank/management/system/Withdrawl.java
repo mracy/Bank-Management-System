@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -16,7 +18,7 @@ import javax.swing.JTextField;
 public class Withdrawl extends JFrame implements ActionListener {
 
     JTextField amountField;
-    JButton withdrawal, back;  // Corrected button names
+    JButton withdrawal, back;
     String pinnumber;
 
     Withdrawl(String pinnumber) {
@@ -43,12 +45,12 @@ public class Withdrawl extends JFrame implements ActionListener {
 
         withdrawal = new JButton("Withdrawal");
         withdrawal.setBounds(355, 485, 150, 30);
-        withdrawal.addActionListener(this);  // Register ActionListener
+        withdrawal.addActionListener(this);
         image.add(withdrawal);
 
         back = new JButton("Back");
         back.setBounds(355, 520, 150, 30);
-        back.addActionListener(this);  // Register ActionListener
+        back.addActionListener(this);
         image.add(back);
 
         setSize(900, 900);
@@ -61,19 +63,32 @@ public class Withdrawl extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == withdrawal) {
             String number = amountField.getText();
-            Date date = new Date();  // Move the declaration outside the if block
-            if (number.equals("")) {
+            Date date = new Date();
+            if (number.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please enter the amount you want to withdraw");
             } else {
-                Conn conn = new Conn();
-                String query = "insert into bank values('" + pinnumber + "', '" + date + "', 'withdrawal', '" + number + "')";
                 try {
-                    conn.s.executeUpdate(query);
-                    JOptionPane.showMessageDialog(null, "Rs: " + number + " Withdrawal Successfully");
-                    setVisible(false);
-                    new Transaction(pinnumber).setVisible(true);
+                    Conn conn = new Conn();
+                    // Modify the query to match your actual table columns
+                    String query = "INSERT INTO bank(pin, date, type, amount) VALUES (?, ?, ?, ?)";
+                    PreparedStatement pstmt = conn.c.prepareStatement(query);
+                    pstmt.setString(1, pinnumber);
+                    pstmt.setString(2, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
+                    pstmt.setString(3, "withdrawal");
+                    pstmt.setString(4, number);
+
+                    int rowsAffected = pstmt.executeUpdate();
+
+                    if (rowsAffected > 0) {
+                        JOptionPane.showMessageDialog(null, "Rs: " + number + " Withdrawal Successfully");
+                        setVisible(false);
+                        new Transaction(pinnumber).setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Withdrawal failed. Please try again.");
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else if (ae.getSource() == back) {
@@ -81,6 +96,7 @@ public class Withdrawl extends JFrame implements ActionListener {
             new Transaction(pinnumber).setVisible(true);
         }
     }
+
 
     public static void main(String[] args) {
         new Withdrawl("");

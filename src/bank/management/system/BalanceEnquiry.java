@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -32,13 +33,15 @@ public class BalanceEnquiry extends JFrame implements ActionListener {
         back.setBounds(355, 520, 150, 30);
         image.add(back);
 
-        Conn c = new Conn();
-        
         int balance = 0;
 
         try {
-            ResultSet rs = c.s.executeQuery("SELECT * FROM bank WHERE pin = '" + pinnumber + "'");
-            
+            Conn c = new Conn();
+            String query = "SELECT * FROM bank WHERE pin = ?";
+            PreparedStatement pstmt = c.c.prepareStatement(query);
+            pstmt.setString(1, pinnumber);
+
+            ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
                 if (rs.getString("type").equals("Deposit")) {
@@ -46,12 +49,12 @@ public class BalanceEnquiry extends JFrame implements ActionListener {
                 } else {
                     balance -= Integer.parseInt(rs.getString("amount"));
                 }
-            } // This is where the misplaced brace was corrected
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         JLabel text = new JLabel("Your Current Account Balance is Rs: " + balance);
         text.setForeground(Color.WHITE);
         text.setBounds(170, 300, 400, 30);
@@ -68,7 +71,6 @@ public class BalanceEnquiry extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    @Override
     public void actionPerformed(ActionEvent ae) {
         setVisible(false);
         new Transaction(pinnumber).setVisible(true);

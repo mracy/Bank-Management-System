@@ -1,13 +1,14 @@
 package bank.management.system;
 
 import java.awt.Color;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 public class MiniStatements extends JFrame {
 
-    JLabel card, bank, mini, balance;  
+    JLabel card, bank, mini, balance;
 
     MiniStatements(String pinnumber) {
         setTitle("Mini Statement");
@@ -32,7 +33,11 @@ public class MiniStatements extends JFrame {
 
         try {
             Conn conn = new Conn();
-            ResultSet rs = conn.s.executeQuery("select * from login where pin = '" + pinnumber + "'");
+            String cardNumberQuery = "SELECT * FROM login WHERE pin = ?";
+            PreparedStatement cardNumberStmt = conn.c.prepareStatement(cardNumberQuery);
+            cardNumberStmt.setString(1, pinnumber);
+            ResultSet rs = cardNumberStmt.executeQuery();
+
             while (rs.next()) {
                 // Display only the first four characters of the card number
                 card.setText("Card number: " + rs.getString("cardnumber").substring(0, 4) + "XXXXXXXX" + rs.getString("cardnumber").substring(12));
@@ -44,16 +49,20 @@ public class MiniStatements extends JFrame {
         try {
             Conn conn = new Conn();
             int capital = 0;
-            ResultSet rs = conn.s.executeQuery("select * from bank where pin = '" + pinnumber + "'");
+            String bankQuery = "SELECT * FROM bank WHERE pin = ?";
+            PreparedStatement bankStmt = conn.c.prepareStatement(bankQuery);
+            bankStmt.setString(1, pinnumber);
+            ResultSet rs = bankStmt.executeQuery();
+
             while (rs.next()) {
-                mini.setText(mini.getText() + "<html>" + rs.getString("date") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + rs.getString("type") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + rs.getString("amount") + "<br><br><html>" );
+                mini.setText(mini.getText() + "<html>" + rs.getString("date") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + rs.getString("type") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + rs.getString("amount") + "<br><br><html>");
                 if (rs.getString("type").equals("Deposit")) {
                     capital += Integer.parseInt(rs.getString("amount"));
                 } else {
                     capital -= Integer.parseInt(rs.getString("amount"));
                 }
             }
-            
+
             balance.setText("Your Current Account Balance is Rs: " + capital);
 
         } catch (Exception e) {
