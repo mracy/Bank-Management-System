@@ -104,6 +104,7 @@ public class Login extends JFrame implements ActionListener {
 
         setSize(800, 480);
         setLocationRelativeTo(null); // Center the frame on the screen
+        setResizable(false); // Make the frame non-resizable
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
